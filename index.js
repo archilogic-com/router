@@ -482,7 +482,7 @@ Router.prototype.use = function use(handler) {
 
     var layer = new Layer(path, {
       sensitive: this.caseSensitive,
-      strict: false,
+      trailing: !this.strict,
       end: false
     }, fn)
 
@@ -512,7 +512,7 @@ Router.prototype.route = function route(path) {
 
   var layer = new Layer(path, {
     sensitive: this.caseSensitive,
-    strict: this.strict,
+    trailing: !this.strict,
     end: true
   }, handle)
 
