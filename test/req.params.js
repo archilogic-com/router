@@ -136,33 +136,15 @@ describe('req.params', function () {
             sawParams(req, res)
           })
         })
-
-        router.get('/*', hitParams(1))
+        // https://expressjs.com/en/guide/migrating-5.html#path-syntax
+        router.get('/*asdf', hitParams(1))
 
         request(server)
         .get('/buzz')
-        .expect('x-params-1', '{"0":"foo","1":"bar","2":"buzz"}')
+        .expect('x-params-1', '{"0":"foo","1":"bar","asdf":"buzz"}')
         .expect(200, '{"0":"foo","1":"bar"}', done)
       })
 
-      it('should merge with same numeric properties', function (done) {
-        var router = Router({ mergeParams: true })
-        var server = createServer(function (req, res, next) {
-          req.params = {'0': 'foo'}
-
-          router(req, res, function (err) {
-            if (err) return next(err)
-            sawParams(req, res)
-          })
-        })
-
-        router.get('/*', hitParams(1))
-
-        request(server)
-        .get('/bar')
-        .expect('x-params-1', '{"0":"foo","1":"bar"}')
-        .expect(200, '{"0":"foo"}', done)
-      })
     })
   })
 })

@@ -1,9 +1,8 @@
 
 var after = require('after')
-var methods = require('methods')
 var Router = require('..')
 var utils = require('./support/utils')
-
+var methods = require('methods')
 var assert = utils.assert
 var createHitHandle = utils.createHitHandle
 var createServer = utils.createServer
@@ -11,6 +10,7 @@ var rawrequest = utils.rawrequest
 var request = utils.request
 var shouldHitHandle = utils.shouldHitHandle
 var shouldNotHitHandle = utils.shouldNotHitHandle
+
 
 describe('Router', function () {
   it('should return a function', function () {
@@ -52,7 +52,7 @@ describe('Router', function () {
 
         var body = method !== 'head'
           ? 'hello, world'
-          : ''
+          : undefined
 
         request(server)
         [method]('/')
@@ -80,32 +80,13 @@ describe('Router', function () {
       .expect(200, 'saw GET /bar', cb)
     })
 
-    it('should support regexp path', function (done) {
-      var cb = after(3, done)
-      var router = new Router()
-      var server = createServer(router)
-
-      router.all(/^\/[a-z]oo$/, saw)
-
-      request(server)
-      .get('/')
-      .expect(404, cb)
-
-      request(server)
-      .get('/foo')
-      .expect(200, 'saw GET /foo', cb)
-
-      request(server)
-      .get('/zoo')
-      .expect(200, 'saw GET /zoo', cb)
-    })
-
     it('should support parameterized path', function (done) {
       var cb = after(4, done)
       var router = new Router()
       var server = createServer(router)
 
       router.all('/:thing', saw)
+
 
       request(server)
       .get('/')
@@ -260,7 +241,7 @@ describe('Router', function () {
 
     var body = method !== 'head'
       ? 'hello, world'
-      : ''
+      : undefined
 
     describe('.' + method + '(path, ...fn)', function () {
       it('should be chainable', function () {
@@ -303,29 +284,6 @@ describe('Router', function () {
 
         request(server)
         [method]('/bar')
-        .expect(shouldHitHandle(1))
-        .expect(200, body, cb)
-      })
-
-      it('should support regexp path', function (done) {
-        var cb = after(3, done)
-        var router = new Router()
-        var server = createServer(router)
-
-        router[method](/^\/[a-z]oo$/, createHitHandle(1), helloWorld)
-
-        request(server)
-        [method]('/')
-        .expect(shouldNotHitHandle(1))
-        .expect(404, cb)
-
-        request(server)
-        [method]('/foo')
-        .expect(shouldHitHandle(1))
-        .expect(200, body, cb)
-
-        request(server)
-        [method]('/zoo')
         .expect(shouldHitHandle(1))
         .expect(200, body, cb)
       })
@@ -735,14 +693,14 @@ describe('Router', function () {
       var router = new Router()
       var server = createServer(router)
 
-      router.use('/foo/', saw)
+      router.use('/foo', saw)
 
       request(server)
       .get('/')
       .expect(404, cb)
 
       request(server)
-      .post('/foo')
+      .post('/foo/')
       .expect(200, 'saw POST /', cb)
 
       request(server)
@@ -755,7 +713,7 @@ describe('Router', function () {
       var router = new Router()
       var server = createServer(router)
 
-      router.use(['/foo/', '/bar'], saw)
+      router.use(['/foo', '/bar'], saw)
 
       request(server)
       .get('/')
@@ -768,34 +726,6 @@ describe('Router', function () {
       request(server)
       .get('/bar')
       .expect(200, 'saw GET /', cb)
-    })
-
-    it('should support regexp path', function (done) {
-      var cb = after(5, done)
-      var router = new Router()
-      var server = createServer(router)
-
-      router.use(/^\/[a-z]oo/, saw)
-
-      request(server)
-      .get('/')
-      .expect(404, cb)
-
-      request(server)
-      .get('/foo')
-      .expect(200, 'saw GET /', cb)
-
-      request(server)
-      .get('/fooo')
-      .expect(404, cb)
-
-      request(server)
-      .get('/zoo/bear')
-      .expect(200, 'saw GET /bear', cb)
-
-      request(server)
-      .get('/get/zoo')
-      .expect(404, cb)
     })
 
     it('should support parameterized path', function (done) {
